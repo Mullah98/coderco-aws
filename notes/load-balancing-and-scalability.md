@@ -1,4 +1,4 @@
-## Load Balancing & Scalability
+# Load Balancing & Scalability
 - Scalability means that an app/system can handle greated loads by adapting.
 - 2 types = *Vertical Scalability* and *Horizontal Scalability*.
 
@@ -26,7 +26,9 @@
 - *Load balancers + Multi AZ + ASG* = Highly available, resilient, and scalable architecture.
 - Ensures apps remain accessible and performant during spikes or failures.
 
-### Load Balancers:
+---
+
+## Load Balancers:
 - Distribute traffic across multiple instances.
 - Prevents any single instance from being overloaded.
 - Works best with *horizontal scaling*.
@@ -46,13 +48,16 @@
 
 **Benefits** = maintain app availability even if some instances fail, ensure scalable, resilient applications, improve user exp during spikes.
 
-### ELB (Elastic Load Balancer)
+---
+
+## ELB (Elastic Load Balancer)
 - A managed load balancer.
 - AWS guarantees that it will be working, takes care of upgrades, maintenance, high availability.
 - Costs less to set up your *own* load balancer but more effort on your end.
 - Less manual configuration compared to self-managed load balancers.
 - You define the routing rules; AWS manages the complexity of traffic distribution.
 
+---
 
 ### Health Checks
 - Used to verify if an instance is alive and ready to handle traffic.
@@ -62,7 +67,9 @@
 - Ensures users only hit working instances.
 - If one instance fails, traffic is rerouted to healthy ones until recovery.
 
-### Types Of Load Balancers
+---
+
+## Types Of Load Balancers
 - **Classic Load Balancer (CLB):**
     - Old generation (2009).
     - Supports HTTP, HTTPS, TCP, SSL.
@@ -96,12 +103,16 @@
     - Use **GWLB** for deploying scalable network appliances.
     - Avoid using CLB unless legacy support is needed.
 
-### Load Balancer Security Groups
+---
+
+## Load Balancer Security Groups
 - Allows incoming traffic from the internet (0.0.0.0/0) over *HTTP* and *HTTPS*.
 - Standard cloud pattern fro secure, scalable traffic flow whilst protecting backend infrastructure.
 - Acts as a protective front layer.
 - **Application SG** - Restricts traffic so only the load balancer can communicate with the backend instance. Ensures instances are not exposed directly to the internet.
 - *Think of load balancer like the front door of a building; users go throught he door but can't access rooms directly.
+
+---
 
 ### ALB (Application Load Balancer)
 - Operates at Layer 7 (HTTP Traffic).
@@ -150,7 +161,9 @@
 - Traffic resumes when resource is back online.
 - Ensures users always directed to healthy instances.
 
-### NLB (Network Load Balancer)
+---
+
+## NLB (Network Load Balancer)
 - Optimized for extreme performance and high traffic with low latency.
 - Operated at *Layer 4 (Transport Layer) of OSI model.
 - Handles TCP & UDCP traffic.
@@ -198,3 +211,131 @@
 - Works across *Classic Load Balancer, Application Load Balancer, and Network Load Balancer*.
 - Load Balancer uses *cookies* to track which instance a client is connected to.
 
+---
+
+## SSL (Secure Socket Layer) / TLS (Transport Layer Security) Certificates
+- Ensures traffic between clients (browsers) and servers are *encrypted* in transit.
+- This is called **in-flight encryption**.
+- Data is scrambled as it travels over the internet, preventing snooping.
+
+**TLS**
+- The modern, more secure version of *SSL*
+
+**Certificate Authoraties**
+- Trusted 3rd parties that verify the identity of websites.
+- Issue SSL/TLS certifcates.
+- *Must* be renewed before expiration data.
+- Duration options include 1 year, 2 years, 3 years, or even 10 years.
+
+## Load Balancer SSL Certifcates
+- Load balancer uses an X.509 certificate
+- Can manage certificates using **ACM (AWS Certificate Manager)**.
+- Can create + upload your own certificates
+
+**Traffic Flow:**
+1. User connects via HTTPS (encrypted over the internet)
+2. Load balancer handles the encrypted connection
+3. Inside the VPC, load balancer forwards request via HTTP (unencrypted)
+4. Private traffic within VPC doesn't need encryption
+5. Request reaches EC2 instance
+
+---
+
+## SNI (Server Name Indication)
+- *Before SNI* - Hosting multiple websites with differnet SSL certs on the same server required a seperate IP address for each one.
+- *After SNI* - Multiple SSL certs can be loaded on the same web server without needing multiple IP addresses.
+
+**How SNI Works**
+1. Browser/client makes initial connection to web server
+2. **Browser sends the hostname** of the website it's trying to reach as part of the SSL handshake
+3. Server uses this hostname information to find the right SSL certificate for that specific website
+4. If no match is found, server uses the **default certificate**
+
+**Why SNI is Important**
+- Perfect for running multiple websites on the same server.
+- Essential for ALB and NLB managing multiple domains.
+- Each website gets the correct SSL certificate automatically.
+- Saves resources by eliminating the need for multiple IP addresses.
+
+**AWS Support for SNI**
+- ✅ **Supported:** ALB (Application Load Balancer), NLB (Network Load Balancer), CloudFront
+- ❌ **NOT Supported:** CLB (Classic Load Balancer)
+
+---
+
+Here’s a clean, concise summary you can paste directly into GitHub or Notion:
+
+---
+
+## Elastic Load Balancers & SSL (AWS)
+
+**Classic Load Balancer (CLB)**
+- Only supports **one SSL certificate**.
+- Serving multiple domains requires **multiple CLBs** → more cost & complexity.
+
+**Application Load Balancer (ALB / ELB)**
+- Supports **multiple SSL certificates** on multiple listeners.
+- Uses **SNI (Server Name Indication)** to serve different domains from one load balancer.
+- More flexible and cost-efficient.
+
+**Network Load Balancer (NLB)**
+- Also supports **multiple SSL certificates** with SNI.
+- Ideal for **high-performance TCP/UDP** workloads that still need SSL.
+
+**Key point:**
+Modern ELBs (ALB & NLB) offer far better SSL flexibility thanks to **SNI**.
+If you're still on CLB, upgrading is recommended.
+
+---
+
+## Connection Draining / Deregistration Delay (AWS ELB)
+- A feature that lets existing requests finish before an instance is removed from a load balancer.
+- Ensures smooth scaling and avoids user interruptions during instance removal.
+
+**How it works:**
+1. The load balancer stops sending new requests to the instance.
+2. In-flight requests are allowed to complete before the instance is fully removed.
+
+---
+
+## ASG (Auto Scaling Groups)
+- Manages instances automatically based on traffic/load changes.
+- Useful for websites and apps with variable traffic.
+- Leverages cloud's ability to scale resources up or down quickly.
+
+**Scaling Operations:**
+- **Scale Out** - Add more instances to handle increased demand. Occurs when traffic increases, upto max capacity limit.
+- **Scale In** - Reduces number of running instances to save costs. Occurs when traffic decreases, never goes below min capacity.
+
+**3 Key Capacity Settings:**
+- **Minimum Capacity** - Least num of instances always running, maintained even during low traffic times.
+- **Desired Capacity** - Target number of instances for normal load. ASG tries to maintain this number unless conditions change.
+- **Maximum Capacity** - Most instances ASG can scale up to during high traffic
+
+**Automatic Load Balancer Integration**
+- New instances automatically regiester with your load balancer.
+- If instances become unhealthy or terminate, ASG automatically recreates it.
+- ASG are *free*. You only pay for the EC2 instances they manage.
+
+---
+
+## CloutWatch Alarms + ASG
+- Moniter metrics like CPU, memory, or custom metrics.
+- Alarm triggers an action.
+
+## ASG Dynamic Scaling Policies
+
+1. **Target Tracking**
+    - Easiest setup.
+    - You define a target metric (e.g., keep CPU at 40%).
+    - ASG adds/removes instances to maintain that target.
+2. **Simple / Step Scaling**
+    - Triggered by CloudWatch alarms.
+    - Example: CPU > 70% → add 2 instances; CPU < 30% → remove 1 instance.
+    - Offers fine-grained control.
+3. **Scheduled Scaling**
+    - Pre-planned scaling for predictable traffic patterns.
+    - Example: boost capacity every Monday at 10 a.m.
+    - Perfect for known spikes (sales events, weekly peaks).
+
+---
