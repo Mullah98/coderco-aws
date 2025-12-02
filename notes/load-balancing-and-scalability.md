@@ -149,3 +149,52 @@
 - If resource is unhealthy, ALB stops routing traffic to it.
 - Traffic resumes when resource is back online.
 - Ensures users always directed to healthy instances.
+
+### NLB (Network Load Balancer)
+- Optimized for extreme performance and high traffic with low latency.
+- Operated at *Layer 4 (Transport Layer) of OSI model.
+- Handles TCP & UDCP traffic.
+- Manages millions of request per second.
+
+**Key benefits:**
+- Low latency; ~100ms latency (ALB has ~400ms)
+- High throughput; Ideal for high-demand apps
+- Statis IP addressing; Assigns one static IP per AZ
+
+**Traffic handling:**
+- Does NOT inspect HTTP headers or handle SSL termination
+- Routes raw TCP or UDP traffic to instances.
+
+---
+
+## Application Load Balancer (ALB) vs Network Load Balancer (NLB)
+
+| Feature | Application Load Balancer (ALB) | Network Load Balancer (NLB) |
+|---------|----------------------------------|------------------------------|
+| **OSI Layer** | Layer 7 (Application Layer) | Layer 4 (Transport Layer) |
+| **Protocol Support** | HTTP, HTTPS | TCP, UDP |
+| **Latency** | ~400ms | ~100ms |
+| **Performance** | Moderate throughput | Millions of requests per second |
+| **Routing Basis** | Path, host, headers, query strings | Port and protocol |
+| **HTTP Header Inspection** | Yes | No |
+| **SSL/TLS Termination** | Yes | No |
+| **Static IP** | No (uses DNS name) | Yes - One static IP per AZ |
+| **Elastic IP Support** | No | Yes |
+| **Target Types** | EC2 instances, ECS tasks, Lambda functions, private IPs | EC2 instances, ECS tasks, private IPs |
+| **Health Checks** | At target group level (HTTP/HTTPS) | At target group level (TCP/UDP) |
+| **Best Use Cases** | Web applications, microservices, content-based routing | Gaming servers, financial services, real-time communication, VoIP, DNS |
+| **AWS Free Tier** | Included (with limits) | NOT included |
+| **Traffic Modification** | Can inspect and modify requests | Forwards traffic without modification |
+| **Ideal For** | Applications needing intelligent routing and Layer 7 features | Applications requiring extreme performance and low latency |
+
+- Choose **ALB** when: You need HTTP/HTTPS routing, content-based routing, SSL termination, or Lambda integration
+- Choose **NLB** when: You need ultra-low latency, static IPs, millions of requests/second, or TCP/UDP protocols
+
+---
+
+## Sticky Sessions
+- Ensure clients consistently connect to the same instance behind a *Load Balancer*.
+- Client *sticks* to a specific server for the duration of their session.
+- Works across *Classic Load Balancer, Application Load Balancer, and Network Load Balancer*.
+- Load Balancer uses *cookies* to track which instance a client is connected to.
+
