@@ -1,6 +1,8 @@
-## Security Groups (SGs)
+# Security Groups (SGs)
 
-### Purpose:
+---
+
+## Purpose:
 - Acts as a *virtual firewall* for EC2 Instances.
 - Controls inbount and outbound traffic.
 - Only *allow rules*, anything nott explicitly allowed is blocked by default.
@@ -42,6 +44,8 @@
 | **SMTP**       | 25   | Email sending.                                                    |
 | **MySQL**      | 3306 | MySQL database access.                                            |
 | **PostgreSQL** | 5432 | Postgres database access.                                         |
+
+---
 
 ### Elastic IPs
 - Assign a fixed public IPv4 to an EC2 instance to maintain a stable IP even after stopping/refreshing.
