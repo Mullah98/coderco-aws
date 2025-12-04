@@ -59,7 +59,7 @@
 
 ---
 
-### Health Checks
+## Health Checks
 - Used to verify if an instance is alive and ready to handle traffic.
 - LB sends a request (e.g., `GET /health` on a specific port).
 - **200 OK → healthy**, LB keeps routing traffic to it. **Non 200 OK**, LB stops sending traffic to that instance.
