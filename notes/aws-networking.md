@@ -5,7 +5,7 @@
 ## CIDR (Classless Inter-Domain Routing)
 - A method for allocating IP addresses and defining IP ranges.
 **Components**
-    - *Base IP* - Start of the range (eh: 10.0.0.0, 192.168.0.0)
+    - *Base IP* - Start of the range (eg: 10.0.0.0, 192.168.0.0)
     - *Subnet Mask* - Number after the slash determines how many bits can change
 **IP Range examples**
 - `/32` -> single IP
@@ -89,3 +89,91 @@ Rule of thumb:
 - Must update route tables to direct traffic to/from the IGW.
 
 ---
+
+## Bastion Hosts
+- Used to securely access private EC2 instances in private subnets.
+- Private instances *cannot be reached directly* from the internet.
+- A bastion host sits in a public subnet and can be accessed from the internet (via SSH).
+- You *SSH into the bastion*, then *SSH into private instances*.
+
+**Security group rules:** 
+- *Bastion*: allow SSH only from trusted IP ranges (e.g., office IP).
+- *Private instances:* allow SSH from the bastion (private IP or SG).
+
+**Purpose:** manage private resources safely without exposing them to the public internet.
+
+---
+
+## NAT Gateway
+- Gives outbound internet to private subnets only.
+- No inbound allowed.
+- Fully managed, auto-scales, no SGs, no patching.
+- AZ-specific, uses an Elastic IP, needs an IGW.
+- Pay per hour + data.
+- Must be in a different subnet from the private instances.
+- Flow: Private Subnet → NAT GW → IGW → Internet.
+
+## High Availability
+- One NAT gateway = one AZ.
+- If that AZ fails, all dependent private subnets lose outbound access.
+- **Fix:** deploy a NAT gateway in every AZ and adjust route tables.
+
+### **NAT Gateway vs NAT Instance**
+
+| Feature | NAT Gateway | NAT Instance |
+| --- | --- | --- |
+| **Availability** | HA within one AZ; create one per AZ for redundancy | No built-in HA; needs failover scripts |
+| **Bandwidth** | Auto-scales up to ~100 Gbps | Limited by EC2 instance size |
+| **Maintenance** | Fully managed by AWS | You manage OS, patches, updates |
+| **Cost Model** | Hourly cost + data processed | EC2 instance cost + network charges |
+| **Security Groups** | No SGs | Supports SGs |
+| **Elastic IP** | Requires EIP | Can use EIP |
+| **Acts as Bastion Host** | ❌ No | ✔️ Yes |
+| **Scalability** | Automatic | Manual (change instance type) |
+| **Use Case** | High availability, high bandwidth, minimal admin | More control, lower cost for small setups |
+
+---
+
+## NACL (Network Access Control List)
+- Controls traffic at *subnet* level.
+- *Stateless* - Inbount and outbound rules must be defined seperately.
+- *1 NACL per subnet*
+- *Lower numbered rules* -> *Higher priority*; First match wins.
+- Denies unmatched traffic by default.
+- Useful for blocking IPs or adding extra security before traffic reaches instances.
+
+## SGs & NACLs
+- **SGs:** 
+    - Operates at instance level
+    - Is *stateful*, if inbount traffic is allowed, then return outbound traffic is automatically allowed
+    - Control traffic to/from EC2 Instances
+- **NACL:**
+    - Operated at subnet level.
+    - Is *stateless*, inbount and outbound rules must be defined
+    - Control traffic entering or leaving the entire subnet
+
+- **Key Differences**
+| Feature | Security Group | NACL |
+| --- | --- | --- |
+| Level | Instance | Subnet |
+| Stateful? | Yes | No |
+| Inbound/Outbound | Outbound auto allowed for responses | Must define both explicitly |
+| Scope | Specific instances | Entire subnet |
+| Use | Firewall for instances | Subnet-level traffic filtering |
+
+---
+
+## VPC Peering
+- Privately connect 2 VPCs without using the internet.
+- Requires *Non-overlapping CIDRs.
+- Each VPS needs its own connection.
+- Must update route tables in *both* VPC subnets to allow communication.
+
+**Advanced features & use cases:**
+- *Cross-account pairing* - VPCs in different AWS accounts can communicate privately.
+- *Cross-region pairing* - VPCs in different regions can be peered.
+- *Reference SGs accross accounts* - SGs in 1 VPC can be reference and peered by a VPC in the *same* region.
+- Useful for large orgs with multiple AWS accounts.
+- Secure dev access to prod resources without exposing the network.
+- Flexible, secure traffic management across isolated environments.
+- Private, secure, scalable connectivity without using the public internet.
