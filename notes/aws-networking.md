@@ -4,9 +4,11 @@
 
 ## CIDR (Classless Inter-Domain Routing)
 - A method for allocating IP addresses and defining IP ranges.
+
 **Components**
     - *Base IP* - Start of the range (eg: 10.0.0.0, 192.168.0.0)
     - *Subnet Mask* - Number after the slash determines how many bits can change
+    
 **IP Range examples**
 - `/32` -> single IP
 - `/26` -> 64 IPs
@@ -17,7 +19,6 @@
 ---
 
 ## How to Calculate Number of IPs From CIDR (Simple Method)
-
 **Formula:**
 `Number of IPs = 2^(32 - CIDR)`
 *Because IPv4 has 32 bits total.*
@@ -35,7 +36,6 @@
 ---
 
 ## How to Know How Many Octets Can Change
-
 *Just look at the CIDR:*
 
 `/0` → all **4 octets** change
@@ -177,3 +177,118 @@ Rule of thumb:
 - Secure dev access to prod resources without exposing the network.
 - Flexible, secure traffic management across isolated environments.
 - Private, secure, scalable connectivity without using the public internet.
+
+---
+
+## VPC Endpoints (AWS PrivateLink)
+- Private, secure access to AWS services *without using the internet*.
+- Powered by *AWS PrivateLink*.
+
+**Why use them?**
+- Keep traffic *inside* AWS.
+- Improves security.
+- Remove need for IGW or NAT Gateway.
+- Fully manages, scalable, reliable.
+
+**How they change routing:**
+- Private instance -> *VPC Endpoint* -> AWS service.
+- No public internet path is used.
+
+**Type of VPC Endpoints:**
+- **Interface Endpoints (PrivateLink)**
+    - Create an ENI with a private IP inside your subnet
+    - Used for most AWS services
+    - Requires SGs
+    - Paid hourly + per GB processed
+    - Keeps traffic fully private inside AWS
+
+- **Gateway Endpoints**
+    - No ENI created
+    - Added to route tables as a target
+    - Only for S3 + DynamoDB
+    - Free
+    - No SGs needed
+    - Simplest way for private access to AWS services
+
+---
+
+## IPv6
+- Successor to IPv4.
+- In AWS - All IPv6 addresses are public.
+- Hexadecimal format.
+- Can shorten long zero sequance using `::`.
+
+**IPv6 in a VPC (Dual Stack)**
+- IPv4 cannot be disabled in AWS.
+- Dual Stack Mode = IPv4 + IPv6.
+- EC2 gets *private IPv4 (internal)* + *public IPv6 (internet-routable)*.
+- IGW supports *both IPv4 and IPv6*.
+
+**IPv6 troubleshooting**
+- Availability is almost never the issue.
+- AWS still requires IPv4 space for launching instances.
+- If an instance won't launch; likely not IPv4 addresses left in subnet. To fix, expand IPv4 CIDR for subnet.
+
+---
+
+## **Egress-Only Internet Gateway (EIGW)**
+- IPv6-only gateway for **outbound internet**.
+- Blocks **all inbound** IPv6 traffic.
+- Used by **private subnets** that need IPv6 internet access.
+- Works like NAT Gateway but **only for IPv6** and **outbound-only**.
+- Route tables must point IPv6 traffic to the EIGW.
+
+**Use Case:** Private IPv6 instances needing internet access without exposure.
+
+---
+
+## **IPv6 Routing in Dual-Stack VPCs**
+**Dual-Stack:** Subnets have both IPv4 + IPv6.
+
+**Public Subnet**
+- Has private IPv4 + public IPv6 + EIP (for IPv4).
+- IPv4 → Internet via IGW (EIP).
+- IPv6 → IGW directly.
+
+**Private Subnet**
+- Has private IPv4 + public IPv6.
+- IPv4 → NAT Gateway.
+- IPv6 → Internet Gateway.
+
+**Key Point:** IPv6 does **not** need NAT.
+
+---
+
+## Dual-Stack IPv6 Architecture
+**Public Subnet**
+- IPv4 and IPv6 both go through **Internet Gateway**.
+
+**Private Subnet**
+- IPv4 → **NAT Gateway** (outbound only).
+- IPv6 → **Egress-Only IGW** (outbound only).
+
+**Purpose:** Outbound connectivity while keeping instances unreachable from the internet.
+
+---
+
+## **VPC Component Summary**
+
+| Component        | Summary                             |
+| ---------------- | ----------------------------------- |
+| CIDR             | IP range for the VPC.               |
+| VPC              | Isolated virtual network.           |
+| Subnet           | Partition of a VPC per AZ.          |
+| Internet Gateway | IPv4/IPv6 internet access.          |
+| Route Table      | Controls traffic paths.             |
+| Bastion Host     | Public EC2 for private access.      |
+| NAT Instance     | Older outbound IPv4 method.         |
+| NAT Gateway      | Managed outbound IPv4 access.       |
+| NACL             | Stateless subnet firewall.          |
+| Security Group   | Stateful instance firewall.         |
+| VPC Peering      | Private VPC-to-VPC link.            |
+| VPC Endpoint     | Private access to AWS services.     |
+| PrivateLink      | Private service-to-VPC via NLB/ENI. |
+| EIGW             | IPv6 outbound-only.                 |
+| Transit Gateway  | Central hub for multi-VPC routing.  |
+
+---
