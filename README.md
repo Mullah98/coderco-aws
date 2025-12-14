@@ -24,3 +24,6 @@ Notes and key concepts I learnt throughout the module
 
 - **[VPC + Networking assignment](assignment-1/)**
 VPC and networking assignment with subnets, routing tables, IGW/NAT setup, and security rules.
+
+- **[Application Load Balancer assignment](assignment-2/)**
+Deploy 2 private EC2 instances behind an Application Load Balancer, configure health checks, security groups, and optional HTTPS with custom domain.
