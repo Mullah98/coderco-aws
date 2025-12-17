@@ -1,5 +1,4 @@
 # Assignment 1 - VPC & Networking
-![architecture diagram of assignment 1](./screenshots/Assignment1-AWS.png)
 ---
 **Description:** This assignment demonstrates the creation of a custom *VPC* with public and private subnets, proper *routing*, *security groups*, *EC2 instances*, a *Bastion host*, and *CloudWatch monitoring*. It showcases fundamental *AWS Networking concepts* and secure deployment practices.
 
