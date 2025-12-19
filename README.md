@@ -30,7 +30,8 @@ I explored core *cloud services*, *networking*, *security*, *scalability*, and *
 
 - **[VPC + Networking assignment](assignment-1/)**  
   VPC and networking assignment with subnets, route tables, IGW/NAT setup, and security rules
-  ![png of aws architecture for assignment 1](./assignment-1/screenshots/Assignment1-AWS.png)
+  ![png of aws architecture diagram for assignment 1](./assignment-1/screenshots/Assignment1-AWS.png)
 
 - **[Application Load Balancer assignment](assignment-2/)**  
   Deployed two private EC2 instances behind an Application Load Balancer, configured health checks, security groups, and HTTPS with a custom domain
+ ![png of alb aws architecture diagram for assignment 2](./assignment-2/screenshots/alb-aws-diagram.drawio.png)

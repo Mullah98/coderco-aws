@@ -1,4 +1,5 @@
 # Assignment 2 - Application Load Balancer
+![aws architecture diagram of alb assignment](./screenshots/alb-aws-diagram.drawio.png)
 ---
 **Description:** This assignment demonstrates a common real-world DevOps architecture using an *Application Load Balancer* to distribute traffic across multiple EC2 instances. It focuses on high availability, secure access, and proper network isolation by placing private EC2 instances behind an ALB. *This assignment is using the same VPC from assignment 1, everything is the same apart from the instances which we terminated.*
 
